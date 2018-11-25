@@ -22,21 +22,21 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 @RunWith(AndroidJUnit4.class)
 public class FirstUiAutomatorTest {
 
-
     @Rule
     public ActivityTestRule<MainActivity> mainActivityTestRule =
             new ActivityTestRule<MainActivity>(MainActivity.class);
 
-    String greetTextField = "com.mycompany.greeter:id/greetEditText";
-    String greetButton = "GREET";
-    String greetTextFinalField = "com.mycompany.greeter:id/messageTextView";
 
 
+    private String greetTextField = "com.mycompany.greeter:id/greetEditText";
+    private String greetButton = "GREET";
+    private String greetTextFinalField = "com.mycompany.greeter:id/messageTextView";
     private UiDevice mDevice;
 
     @Before
@@ -47,18 +47,14 @@ public class FirstUiAutomatorTest {
         mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         mDevice.pressHome();
         mDevice.wait(Until.hasObject(By.pkg(getLauncherPackageName()).depth(0)), 1000);
-        mDevice.pressMenu();
-
-
         clickLauncherApp();
-
 
     }
 
     @Test
     public void displayName() {
 
-        // Get User name Input
+        // User name Input
         String enteredUserName = "Sunny";
 
         // Enter username in greet text field
@@ -82,26 +78,37 @@ public class FirstUiAutomatorTest {
 
 
     public void enterUserName(String userName) {
-        UiObject2 textField = mDevice.findObject(By.res(greetTextField));
-        System.out.print(textField);
-
-        textField.setText(userName);
+        try {
+            UiObject2 textField = mDevice.findObject(By.res(greetTextField));
+            textField.setText(userName);
+        } catch (NoSuchElementException e) {
+            System.out.print("Enter username field not found");
+        }
     }
 
     public void clickGreetButton() {
-        UiObject2 clickButton = mDevice.findObject(By.text(greetButton));
-        clickButton.click();
+        try {
+            UiObject2 clickButton = mDevice.findObject(By.text(greetButton));
+            clickButton.click();
+        } catch (NoSuchElementException e) {
+            System.out.print("Greet Button not found");
+        }
     }
 
     public String getFinalGreetMessage() {
-        UiObject2 greetMessage = mDevice.findObject(By.res(greetTextFinalField));
-        return greetMessage.getText();
-
+        try {
+            UiObject2 greetMessage = mDevice.findObject(By.res(greetTextFinalField));
+            return greetMessage.getText();
+        } catch (NoSuchElementException e) {
+            System.out.print("Final Text Not Found");
+            return null ;
+        }
 
     }
 
 
     private String getLauncherPackageName() {
+
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
 
