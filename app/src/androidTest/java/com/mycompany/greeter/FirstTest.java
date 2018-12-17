@@ -13,11 +13,13 @@ import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiScrollable;
 import android.support.test.uiautomator.UiSelector;
+import android.support.test.uiautomator.Until;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+
 
 public class FirstTest {
 
@@ -25,21 +27,20 @@ public class FirstTest {
     public ActivityTestRule<MainActivity> mainActivityTestRule =
             new ActivityTestRule<MainActivity>(MainActivity.class);
 
-    private String textFieldId = "com.mycompany.greeter:id/greetEditText";
+    private String greetTextField = "com.mycompany.greeter:id/greetEditText";
     private String greetButton = "com.mycompany.greeter:id/greetButton";
     private String greetText = "com.mycompany.greeter:id/messageTextView";
     private UiDevice mDevice;
+    UtilityClass utilityClass = new UtilityClass();
+
 
 
     @Before
     public void base() throws UiObjectNotFoundException {
         mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         mDevice.pressHome();
-        try {
-            clickLauncherApp();
-        } catch (UiObjectNotFoundException e) {
-            e.printStackTrace();
-        }
+        openTheApp();
+
     }
 
     @Test
@@ -47,46 +48,37 @@ public class FirstTest {
         enterNameForGreetings();
         clickOnGreetButton();
         String greetingMessage = getGreetings();
+        Assert.assertEquals("Hello, Jai!" , greetingMessage);
 
     }
 
     public void enterNameForGreetings() {
-        UiObject2 textField = mDevice.findObject(By.res("com.mycompany.greeter","greetEditText"));
+        utilityClass.wait(greetTextField,1000);
+        UiObject2 textField = mDevice.findObject(By.res(greetTextField));
         textField.setText("Jai");
     }
 
     public void clickOnGreetButton() {
-        UiObject2 button = mDevice.findObject(By.text(greetButton));
+        mDevice.wait(Until.findObject(By.res(greetButton)),1000);
+        UiObject2 button = mDevice.findObject(By.res(greetButton));
         button.click();
     }
 
     public String getGreetings() {
-        UiObject2 greetMessage = mDevice.findObject(By.text(greetText));
+        mDevice.wait(Until.findObject(By.res(greetText)),1000);
+        UiObject2 greetMessage = mDevice.findObject(By.res(greetText));
         return greetMessage.getText();
 
     }
-
-    private String getLauncherPackageName() {
-
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-
-        PackageManager pm = InstrumentationRegistry.getContext().getPackageManager();
-        ResolveInfo resolveInfo = pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
-
-        return resolveInfo.activityInfo.packageName;
+    public void openTheApp(){
+        mDevice.wait(Until.findObject(By.text(greetTextField)),1000);
+        UiObject2 clickOnAppIcon = mDevice.findObject(By.text("Greeter"));
+        clickOnAppIcon.click();
 
     }
 
-    public void clickLauncherApp() throws UiObjectNotFoundException {
-        UiScrollable appViews = new UiScrollable(new UiSelector().scrollable(true));
-        appViews.setAsHorizontalList();
 
-        UiObject greeterApp = appViews.getChildByText(
-                new UiSelector().className(android.widget.TextView.class.getName()), "Greeter");
 
-        greeterApp.clickAndWaitForNewWindow();
-    }
 
 }
 
